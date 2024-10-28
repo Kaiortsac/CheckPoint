@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheckPoint</title>
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+    <header>
+        <h1>CheckPoint</h1>
+        <p id="currentDateTime"></p>
+    </header>
+    <main>
+        <section class="ponto">
+            <h2>Registrar Ponto</h2>
+            <!-- Novo campo para selecionar uma data -->
+            <label for="dataPonto">Selecionar Data:</label>
+            <input type="date" id="dataPonto" max="" onchange="validarData()">
+            <button onclick="registrarPonto('entrada')">Registrar Entrada</button>
+            <button onclick="registrarPonto('saida')">Registrar Saída</button>
+            <button onclick="registrarPonto('intervaloEntrada')">Registrar Entrada Intervalo</button>
+            <button onclick="registrarPonto('intervaloSaida')">Registrar Saída Intervalo</button>
+        </section>
+
+        <section class="extras">
+            <h2>Justificativas e Observações</h2>
+            <label for="observacao">Adicionar Observação:</label>
+            <input type="text" id="observacao">
+            <button onclick="adicionarObservacao()">Salvar Observação</button>
+
+            <label for="justificativa">Justificar Ausência:</label>
+            <textarea id="justificativa" placeholder="Digite a justificativa"></textarea>
+            <input type="file" id="arquivoJustificativa">
+            <button onclick="justificarAusencia()">Salvar Justificativa</button>
+        </section>
+
+        <section class="relatorio">
+            <h2>Relatório de Pontos</h2>
+            <button onclick="visualizarRelatorio()">Visualizar Relatório</button>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Pontos</title>
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+    <header>
+        <h1>Relatório de Pontos</h1>
+    </header>
+    <main>
+        <section id="relatorio">
+            <ul id="listaRegistros"></ul>
+        </section>
+        
+        <!-- Formulário de edição -->
+        <section id="formEdicao" style="display: none;">
+            <h2>Editar Registro</h2>
+            <label for="dataEdicao">Data:</label>
+            <input type="datetime-local" id="dataEdicao" max="" onchange="validarDataEdicao()">
+            <label for="tipoEdicao">Tipo:</label>
+            <select id="tipoEdicao">
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+                <option value="intervaloEntrada">Entrada Intervalo</option>
+                <option value="intervaloSaida">Saída Intervalo</option>
+            </select>
+            <label for="observacaoEdicao">Observação:</label>
+            <input type="text" id="observacaoEdicao">
+            <button onclick="salvarEdicao()">Salvar</button>
+            <button onclick="cancelarEdicao()">Cancelar</button>
+        </section>
+    </main>
+    <script>
+        let registros = [];
+        let registroEditandoIndex = -1;
+
+        function carregarRegistros() {
+            registros = JSON.parse(localStorage.getItem("registros") || "[]");
+            const lista = document.getElementById("listaRegistros");
+
+            // Limpa a lista antes de carregar
+            lista.innerHTML = "";
+
+            registros.forEach((registro, index) => {
+                const item = document.createElement("li");
+                item.innerHTML = `${new Date(registro.dataHora).toLocaleString("pt-BR")} - ${registro.tipo}`;
+                
+                // Marcar registros passados visualmente
+                if (registro.passado) {
+                    item.style.color = "gray";
+                    item.style.fontStyle = "italic";
+                    item.innerHTML += " (Registro no passado)";
+                }
+
+                if (registro.observacao) item.innerHTML += ` - Observação: ${registro.observacao}`;
+                
+                const editarBtn = document.createElement("button");
+                editarBtn.innerText = "Editar";
+                editarBtn.onclick = () => abrirFormularioEdicao(index);
+
+                const excluirBtn = document.createElement("button");
+                excluirBtn.innerText = "Excluir";
+                excluirBtn.onclick = () => alert("Exclusão de registros não permitida.");
+
+                item.appendChild(editarBtn);
+                item.appendChild(excluirBtn);
+                lista.appendChild(item);
+            });
+        }
+
+        function abrirFormularioEdicao(index) {
+            registroEditandoIndex = index;
+            const registro = registros[index];
+            const dataHora = new Date(registro.dataHora);
+            const dataEdicaoInput = document.getElementById("dataEdicao");
+
+            // Preencher o formulário com os dados do registro
+            dataEdicaoInput.value = dataHora.toISOString().slice(0, 16); // Formato yyyy-mm-ddThh:mm
+            document.getElementById("tipoEdicao").value = registro.tipo;
+            document.getElementById("observacaoEdicao").value = registro.observacao || "";
+
+            // Exibe o formulário de edição
+            document.getElementById("formEdicao").style.display = "block";
+        }
+
+        function validarDataEdicao() {
+            const dataEdicao = document.getElementById("dataEdicao");
+            const today = new Date().toISOString().split("T")[0]; // Data de hoje no formato yyyy-mm-dd
+            dataEdicao.setAttribute("max", today + 'T23:59'); // Limita a data e hora até o final do dia atual
+        }
+
+        function salvarEdicao() {
+            if (registroEditandoIndex === -1) return;
+
+            const dataEdicao = document.getElementById("dataEdicao").value;
+            const tipoEdicao = document.getElementById("tipoEdicao").value;
+            const observacaoEdicao = document.getElementById("observacaoEdicao").value;
+
+            const novoRegistro = {
+                tipo: tipoEdicao,
+                dataHora: new Date(dataEdicao).toISOString(),
+                observacao: observacaoEdicao,
+                passado: new Date(dataEdicao) < new Date().setHours(0, 0, 0, 0), // Marca como passado se for antes de hoje
+            };
+
+            registros[registroEditandoIndex] = novoRegistro; // Atualiza o registro
+            localStorage.setItem("registros", JSON.stringify(registros));
+            alert("Registro editado com sucesso.");
+            cancelarEdicao(); // Fecha o formulário
+            carregarRegistros(); // Atualiza a lista
+        }
+
+        function cancelarEdicao() {
+            registroEditandoIndex = -1;
+            document.getElementById("formEdicao").style.display = "none"; // Esconde o formulário
+        }
+
+        window.onload = carregarRegistros;
+    </script>
+</body>
+</html>
